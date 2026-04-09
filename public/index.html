@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Church Certificate Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=UnifrakturMaguntia&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav class="main-nav">
+  <div class="nav-brand">&#9962; Church Certificate Generator</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-tab="builder">Builder</button>
+    <button class="nav-tab" data-tab="templates">Templates</button>
+    <button class="nav-tab" data-tab="settings">Settings</button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<!-- BUILDER VIEW                                                              -->
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<div id="view-builder" class="view active">
+  <div class="builder-layout">
+
+    <!-- Left sidebar -->
+    <div class="builder-sidebar">
+      <div class="sidebar-top">
+        <div class="paper-controls">
+          <label class="ctrl-label">Paper &amp; Orientation</label>
+          <select id="paperSize" class="ctrl-select">
+            <option value="letter-landscape">Letter — Landscape</option>
+            <option value="letter-portrait">Letter — Portrait</option>
+            <option value="a4-landscape">A4 — Landscape</option>
+            <option value="a4-portrait">A4 — Portrait</option>
+          </select>
+        </div>
+
+        <div class="pages-header">
+          <span class="section-title">Pages</span>
+          <button id="addPageBtn" class="btn btn-primary btn-sm">+ Add Page</button>
+        </div>
+        <div id="pageList" class="page-list"></div>
+      </div>
+
+      <div id="certFormWrap" class="cert-form-wrap">
+        <div id="certForm" class="cert-form">
+          <p class="form-empty-msg">Add a page to begin.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview area -->
+    <div class="builder-preview-area">
+      <div class="preview-toolbar">
+        <span class="preview-label">Live Preview</span>
+        <div class="preview-actions">
+          <button id="prevPageBtn" class="btn btn-ghost btn-sm">&#8592; Prev</button>
+          <span id="previewPageLabel" class="page-nav-label">—</span>
+          <button id="nextPageBtn" class="btn btn-ghost btn-sm">Next &#8594;</button>
+          <button id="printBtn" class="btn btn-success">&#128438; Print / Export</button>
+        </div>
+      </div>
+      <div id="previewContainer" class="preview-container">
+        <div id="certPreviewWrap" class="cert-preview-wrap">
+          <div id="certPreview" class="cert-preview"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<!-- TEMPLATES VIEW                                                            -->
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<div id="view-templates" class="view">
+  <div class="templates-layout">
+    <div class="templates-toolbar">
+      <div class="tpl-ctrl-group">
+        <label class="ctrl-label">Certificate Type</label>
+        <select id="tplTypeSelect" class="ctrl-select"></select>
+      </div>
+      <div class="tpl-ctrl-group">
+        <label class="ctrl-label">Page</label>
+        <select id="tplPageSelect" class="ctrl-select"></select>
+      </div>
+      <div class="tpl-ctrl-group">
+        <label class="ctrl-label">Background</label>
+        <button id="uploadBgBtn" class="btn btn-secondary btn-sm">Upload Image</button>
+        <button id="removeBgBtn" class="btn btn-ghost btn-sm">Remove</button>
+        <input type="file" id="bgFileInput" accept="image/*" style="display:none">
+      </div>
+      <div class="tpl-ctrl-group">
+        <label class="ctrl-label">History</label>
+        <div style="display:flex;gap:4px;">
+          <button id="undoBtn" class="btn btn-ghost btn-sm" title="Undo (Ctrl+Z)" disabled>&#8630; Undo</button>
+          <button id="redoBtn" class="btn btn-ghost btn-sm" title="Redo (Ctrl+Y)" disabled>Redo &#8631;</button>
+        </div>
+      </div>
+      <div class="tpl-ctrl-group tpl-ctrl-group--right">
+        <button id="saveTemplateBtn" class="btn btn-primary">Save Template</button>
+        <button id="resetTemplateBtn" class="btn btn-danger btn-sm">Reset Default</button>
+      </div>
+    </div>
+
+    <div class="templates-editor-area">
+      <!-- Canvas -->
+      <div class="canvas-column">
+        <div id="tplCanvasWrap" class="tpl-canvas-wrap">
+          <div id="tplCanvas" class="tpl-canvas">
+            <div id="tplCertRender" class="tpl-cert-render"></div>
+            <!-- field boxes rendered here -->
+          </div>
+        </div>
+        <p class="canvas-hint">Drag fields to reposition. Click to select and edit properties.</p>
+      </div>
+
+      <!-- Properties panel -->
+      <div class="props-column">
+        <div class="props-panel">
+          <h3 class="props-title">Field Properties</h3>
+          <div id="fieldProps" class="field-props">
+            <p class="props-empty">Click a field on the canvas to edit its properties.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<!-- SETTINGS VIEW                                                             -->
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<div id="view-settings" class="view">
+  <div class="settings-container">
+    <h2 class="settings-title">Default Settings</h2>
+    <p class="settings-desc">These values pre-fill new certificate pages. You can still override them per page in the Builder.</p>
+    <form id="settingsForm" class="settings-form">
+      <div class="settings-group">
+        <h3>Church Officials</h3>
+        <div class="form-row">
+          <label>Church Secretary</label>
+          <input type="text" name="defaultSecretary" class="form-input">
+        </div>
+        <div class="form-row">
+          <label>Church Council / Elder</label>
+          <input type="text" name="defaultCouncil" class="form-input">
+        </div>
+        <div class="form-row">
+          <label>Minister / Pastor</label>
+          <input type="text" name="defaultPastor" class="form-input">
+        </div>
+      </div>
+      <div class="settings-group">
+        <h3>Church Information</h3>
+        <div class="form-row">
+          <label>Church Name</label>
+          <input type="text" name="churchName" class="form-input">
+        </div>
+        <div class="form-row">
+          <label>Church Address</label>
+          <input type="text" name="churchAddress" class="form-input">
+        </div>
+        <div class="form-row">
+          <label>Denomination / Organization</label>
+          <input type="text" name="denomination" class="form-input">
+        </div>
+      </div>
+      <div class="settings-group">
+        <h3>Footer Information</h3>
+        <div class="form-row">
+          <label>National HQ Address</label>
+          <input type="text" name="nationalHQ" class="form-input">
+        </div>
+        <div class="form-row">
+          <label>District Office Address</label>
+          <input type="text" name="districtOffice" class="form-input">
+        </div>
+      </div>
+      <div class="settings-actions">
+        <button type="submit" class="btn btn-primary">Save Settings</button>
+        <span id="settingsSaved" class="save-indicator" style="display:none">&#10003; Saved</span>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<!-- PRINT AREA (hidden, shown only during print)                              -->
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<div id="printArea" class="print-area"></div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<!-- ADD PAGE MODAL                                                            -->
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<div id="addPageModal" class="modal-overlay">
+  <div class="modal-box">
+    <h3 class="modal-title">Add Certificate Page</h3>
+    <div class="form-row">
+      <label>Certificate Type</label>
+      <select id="newPageType" class="form-input">
+        <option value="baptismal">Baptismal Certificate</option>
+        <option value="dedication">Dedication Certificate</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button id="confirmAddPage" class="btn btn-primary">Add Page</button>
+      <button id="cancelAddPage" class="btn btn-ghost">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<!-- TOAST NOTIFICATION                                                        -->
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<div id="toast" class="toast"></div>
+
+<script src="/js/app.js"></script>
+<script src="/js/settings.js"></script>
+<script src="/js/builder.js"></script>
+<script src="/js/template-editor.js"></script>
+</body>
+</html>
